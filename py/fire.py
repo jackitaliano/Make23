@@ -41,6 +41,7 @@ def on_data_change(event):
                 urls = search.search(open_key, bing_key, notes)
                 
             except Exception as e:
+                print(e)
                 return
             
             html_notes = markdown.markdown(notes)
