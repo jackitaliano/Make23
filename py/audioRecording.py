@@ -2,13 +2,18 @@ import pyaudio
 import wave
 import openai
 import os
+import json
 import multiprocessing
 import firebase_admin
 from firebase_admin import db
 
-def record_audio():
-    openai.api_key = "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"
+keys : str
+with open('./py/keys.json', 'r') as file:
+    keys = json.load(file)
 
+def record_audio():
+    openai.api_key = keys['openai']
+    
     cred = firebase_admin.credentials.Certificate("./makeOhioAdminSDK.json")
     app = firebase_admin.initialize_app(cred,{
         'databaseURL': 'https://makeohio2023-default-rtdb.firebaseio.com/'
