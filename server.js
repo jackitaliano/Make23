@@ -1,5 +1,4 @@
 var express = require('express');
-
 var bodyParser = require("body-parser");
 
 var app = express();
@@ -17,12 +16,22 @@ firebaseAdmin.initializeApp({
     databaseURL: 'https://makeohio2023-default-rtdb.firebaseio.com'
 })
 
+const { spawnSync } = require("child_process");
+
+function summarize(){
+    const output = spawnSync('python', ['chat.py'], {encoding: 'utf-8'}).output[1];
+
+    return output;
+}
+
 const db = firebaseAdmin.database();
 
 const ref = db.ref('NewSentence');
 ref.on('value', (snapshot) => {
     console.log('Data Changed: ', snapshot.val());
     const data = snapshot.val();
+
+    console.log("python code: " + runHello())
 
     db.ref('data').set(data);
 });
