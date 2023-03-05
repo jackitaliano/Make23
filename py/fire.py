@@ -40,15 +40,16 @@ def on_data_change(event):
                 notes = chat.summarize(open_key, markdown_context, new_content)
                 urls = search.search(open_key, bing_key, notes)
                 
+            
+                html_notes = markdown.markdown(notes)
+
+                update_notes(html_notes)
+                update_related_links(urls)
+                # update_related_images(urls)
+                
             except Exception as e:
                 print(e)
                 return
-            
-            html_notes = markdown.markdown(notes)
-
-            update_notes(html_notes)
-            # update_related_links(urls)
-            # update_related_images(urls)
         
 def update_notes(text: str):
     ref.update({
