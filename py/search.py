@@ -1,4 +1,3 @@
-import sys
 import requests
 import openai
 import ast
@@ -123,14 +122,3 @@ def search(openai_key: str, bing_key: str, notes: str):
     urls = get_search_urls(bing_key, query)
     
     return urls[0]
-
-def main():
-    openai_key = sys.argv[1]
-    bing_key = sys.argv[2]
-    notes = sys.argv[3]
-    
-    url = search(openai_key, bing_key, notes)
-    print(notes)
-    
-if '__name__' == main:
-    main()

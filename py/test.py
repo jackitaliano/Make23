@@ -1,5 +1,5 @@
-import functions.chat as chat
-import functions.search as search
+import py.chat as chat
+import py.search as search
 import json
 
 keys:str
