@@ -11,21 +11,21 @@ keys : str
 with open('./py/keys.json', 'r') as file:
     keys = json.load(file)
 
-def record_audio():
-    openai.api_key = keys['openai']
-    
-    cred = firebase_admin.credentials.Certificate("./makeOhioAdminSDK.json")
-    app = firebase_admin.initialize_app(cred,{
-        'databaseURL': 'https://makeohio2023-default-rtdb.firebaseio.com/'
-    })
+openai.api_key = keys['openai']
 
-    form_1 = pyaudio.paInt16 # 16-bit resolution
-    chans = 1 # 1 channel
-    samp_rate = 44100 # 44.1kHz sampling rate
-    chunk = 4096 # 2^12 samples for buffer
-    record_secs = 5 # seconds to record
-    dev_index = 2 # device index found by p.get_device_info_by_index(ii)
-    wav_output_filename = 'test1.wav' # name of .wav file
+cred = firebase_admin.credentials.Certificate("./makeOhioAdminSDK.json")
+app = firebase_admin.initialize_app(cred,{
+    'databaseURL': 'https://makeohio2023-default-rtdb.firebaseio.com/'
+})
+form_1 = pyaudio.paInt16 # 16-bit resolution
+chans = 1 # 1 channel
+samp_rate = 44100 # 44.1kHz sampling rate
+chunk = 4096 # 2^12 samples for buffer
+record_secs = 5 # seconds to record
+dev_index = 0 # device index found by p.get_device_info_by_index(ii)
+wav_output_filename = 'test1.wav' # name of .wav file
+
+def record_audio():
 
     audio = pyaudio.PyAudio() # create pyaudio instantiation
 
@@ -40,7 +40,6 @@ def record_audio():
     })
 
     while(True):
-
         # create pyaudio stream
         stream = audio.open(format = form_1,rate = samp_rate,channels = chans, \
                             input_device_index = dev_index,input = True, \
