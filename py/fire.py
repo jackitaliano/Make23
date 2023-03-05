@@ -4,12 +4,15 @@ from firebase_admin import db
 import json
 import chat
 import search
+import urllib.parse
+import markdown
+from html2markdown import convert
 
 # keys : dict
 # with open('./keys.json', 'r') as file:
 #     keys = json.load(file)
     
-open_key = "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"
+open_key = "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"
 bing_key = "22898e58ec7b42df95d4a7b7de95c4cf"
 
 cred = credentials.Certificate('makeohio2023-firebase-adminsdk-iyviq-6daa757964.json')
@@ -17,22 +20,53 @@ firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://makeohio2023-default-rtdb.firebaseio.com'
 })
 
-notes_ref = db.reference('SummarizedData')
+ref = db.reference('/')
+sentence_ref = db.reference('NewSentence')
 
 # Define a callback to handle changes to the data
 def on_data_change(event):
     if event.event_type == "put":
         new_content = event.data
-        notes = chat.summarize(open_key, "", new_content)
-        urls = search.search(open_key, bing_key, notes)
-        
-        print(notes)
-        update_notes(notes)
+        if new_content and len(new_content.split()) > 5:
+            context_ref = db.reference('SummarizedData')
+            context = context_ref.get()
+            
+            if context:
+                markdown_context = convert(context)
+            else:
+                markdown_context=""
+            
+            try:
+                notes = chat.summarize(open_key, markdown_context, new_content)
+                urls = search.search(open_key, bing_key, notes)
+                
+            except Exception as e:
+                return
+            
+            html_notes = markdown.markdown(notes)
+
+            update_notes(html_notes)
+            # update_related_links(urls)
+            # update_related_images(urls)
         
 def update_notes(text: str):
-    notes_ref.set(text);
+    ref.update({
+        "SummarizedData": urllib.parse.quote(text)
+    })
+    
+def update_related_links(url: str):
+    text = url['url'] + '~' + url['title']
+    ref.set({
+        "RelatedLinks": text
+    })
+
+def update_related_images(url: str):
+    text = url['url'] + '~' + url['title']
+    ref.set({
+        "RelatedImages": text
+    })
+    
 
 # Listen to changes in the "users" node
-sentence_ref = db.reference('NewSentence')
 sentence_ref.listen(on_data_change)
 

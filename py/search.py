@@ -116,9 +116,11 @@ def search(openai_key: str, bing_key: str, notes: str):
     search_terms = get_search_terms(openai_key, notes)
     
     query_list = ast.literal_eval(search_terms)
-    
-    query = query_list[0]
-    
-    urls = get_search_urls(bing_key, query)
-    
-    return urls[0]
+    if query_list: 
+        query = query_list[0]
+        
+        urls = get_search_urls(bing_key, query)
+        
+        return urls[0]
+    else:
+        return None
