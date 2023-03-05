@@ -8,12 +8,12 @@ import urllib.parse
 import markdown
 from html2markdown import convert
 
-# keys : dict
-# with open('./keys.json', 'r') as file:
-#     keys = json.load(file)
+keys : dict
+with open('./py/keys.json', 'r') as file:
+    keys = json.load(file)
     
-open_key = "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"
-bing_key = "22898e58ec7b42df95d4a7b7de95c4cf"
+open_key = keys['openai']
+bing_key = keys['bing']
 
 cred = credentials.Certificate('makeohio2023-firebase-adminsdk-iyviq-6daa757964.json')
 firebase_admin.initialize_app(cred, {
