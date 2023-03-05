@@ -1,4 +1,4 @@
-import json
+import sys
 import openai
 
 def summarize(api_key: str, context: str, new_content: str):
@@ -67,3 +67,14 @@ def summarize(api_key: str, context: str, new_content: str):
     chat_response = completion.choices[0].message.content
     
     return chat_response
+
+def main():
+    api_key = sys.argv[1]
+    context = sys.argv[2]
+    new_content = sys.argv[3]
+    
+    notes = summarize(api_key, context, new_content)
+    print(notes)
+    
+if '__name__' == main:
+    main()
