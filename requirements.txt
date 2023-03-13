@@ -1,8 +1,0 @@
-openai
-azure-cognitiveservices-search-websearch
-msrest
-firebase-admin
-python-pptx
-html2markdown
-markdown
-pyaudio
