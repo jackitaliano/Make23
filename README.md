@@ -2,11 +2,11 @@
 ## Startup process:
 Terminal 1:
 - cd ./NotesApp/frontend
-- npm run dev\n
+- npm run dev
 
 Terminal 2:
 - cd ./NotesApp
-- python manage.py runserver\n
+- python manage.py runserver
 
 ## Dependencies
 - pip install -r requirements
