@@ -6,9 +6,7 @@ from .models import Note
 from .utils import chat, transcribe
 from rest_framework.response import Response
 
-api_key = "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"
-
-def summarize_transcript(transcript: str, notes: str=""):
+def summarize_transcript(api_key: str, transcript: str, notes: str=""):
     queryset = Note.objects.all()
     
     try:
@@ -29,7 +27,7 @@ def summarize_transcript(transcript: str, notes: str=""):
         note.save()
         return Response(NoteSerializer(note).data, status=status.HTTP_201_CREATED)
 
-def transcribe_audio(audio_fp: str):
+def transcribe_audio(api_key:str, audio_fp: str):
     queryset = Note.objects.all()
     
     try: 

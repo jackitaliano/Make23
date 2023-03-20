@@ -5,7 +5,11 @@ from rest_framework.response import Response
 from .serializers import NoteSerializer, TakeNotesSerializer
 from .models import Note
 from .request_utils import summarize_transcript, transcribe_audio
-from django.http import JsonResponse
+import json
+
+with open("./api/api_keys.json", "r") as file:
+    keys = json.load(file)
+    open_ai_key = keys['open-ai']
 
 class NoteView(generics.ListAPIView):
     serializer_class = NoteSerializer
@@ -35,7 +39,7 @@ class TakeNotesView(APIView):
         transcript = serializer.data.get(self.transcript_key)
         notes = serializer.data.get(self.notes_key)
         
-        return summarize_transcript(transcript, notes)
+        return summarize_transcript(open_ai_key, transcript, notes)
 
 class AudioReceiverView(APIView):
     def post(self, request, *args, **kwargs):
@@ -46,6 +50,6 @@ class AudioReceiverView(APIView):
         with open(audio_fp, 'wb') as f:
             f.write(blob)
             
-        return transcribe_audio(audio_fp)
+        return transcribe_audio(open_ai_key, audio_fp)
             
             
