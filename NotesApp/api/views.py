@@ -4,7 +4,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import NoteSerializer, TakeNotesSerializer
 from .models import Note
-from .utils import chat
+from .request_utils import summarize_transcript, transcribe_audio
+from django.http import JsonResponse
 
 class NoteView(generics.ListAPIView):
     serializer_class = NoteSerializer
@@ -31,24 +32,20 @@ class TakeNotesView(APIView):
         if not serializer.is_valid():
             return Response({'Bad Request': 'Invalid data...'}, status=status.HTTP_400_BAD_REQUEST)
         
-        queryset = Note.objects.all()
         transcript = serializer.data.get(self.transcript_key)
         notes = serializer.data.get(self.notes_key)
         
-        summarized = chat.summarize("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", "", transcript)
-        
-        if queryset.exists():
-            note = queryset[0]
-            note.transcript = transcript
-            note.notes = summarized
-            note.save(update_fields=['transcript', 'notes'])
-            return Response(NoteSerializer(note).data, status=status.HTTP_200_OK)
-            
-        else:
-            note = Note(transcript=transcript, notes=summarized)
-            note.save()
-            return Response(NoteSerializer(note).data, status=status.HTTP_201_CREATED)
-            
+        return summarize_transcript(transcript, notes)
 
-
+class AudioReceiverView(APIView):
+    def post(self, request, *args, **kwargs):
+        audio_file = request.FILES['audio_file']
+        blob = audio_file.read()
+        audio_fp = 'audio.webm'
         
+        with open(audio_fp, 'wb') as f:
+            f.write(blob)
+            
+        return transcribe_audio(audio_fp)
+            
+            
