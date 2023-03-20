@@ -1,7 +1,6 @@
 {
   "name": "frontend",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "dev": "webpack --mode development --watch",
@@ -23,10 +22,12 @@
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
     "@mui/material": "^5.11.12",
+    "axios": "^1.3.4",
     "babel-loader": "^9.1.2",
     "md-block": "^0.0.1",
     "react-markdown": "^8.0.5",
     "react-media-recorder": "^1.6.6",
     "react-router-dom": "^6.9.0"
-  }
+  },
+  "description": ""
 }

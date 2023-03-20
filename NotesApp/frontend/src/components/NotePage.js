@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Grid, Container, Box, Button} from '@mui/material';
+import { Grid, Box, Button, Accordion, AccordionDetails, AccordionSummary} from '@mui/material';
 import NoteCard from "./Note";
 import TranscriptCard from "./Transcript";
 import Recorder from "./Recorder";
@@ -26,11 +26,15 @@ export default class NotePage extends Component {
       transcript: "",
       notes: "",
     }
-    this.getNote()
-    this.handleButtonClicked= this.handleButtonClicked.bind(this);
+    this.getNote = this.getNote.bind(this);
+    this.takeNotes= this.takeNotes.bind(this);
+    this.update = this.update.bind(this);
+
+    this.getNote();
   }
 
   getNote(){
+    console.log("getting notes");
     var csrftoken = getCookie('csrftoken')
     const requestOptions = {
       method: "GET",
@@ -46,13 +50,12 @@ export default class NotePage extends Component {
       this.setState({ 
         transcript: data.transcript,
         notes: data.notes,
-      }, () => {
-        console.log(this.state);
       }); 
     });
   }
 
-  handleButtonClicked(){
+  takeNotes(){
+    console.log("taking notes");
     var csrftoken = getCookie('csrftoken')
     const requestOptions = {
       method: "POST",
@@ -72,37 +75,34 @@ export default class NotePage extends Component {
       this.setState({ 
         transcript: data.transcript,
         notes: data.notes,
-      }, () => {
-        console.log(this.state);
       }); 
   });
   }
 
+  update() {
+    console.log("test update");
+    this.getNote();
+  }
+
   render() {
     return (
-      <Box mt={2}>
-      <Container maxWidth="xlg">
+      <Box mt={2} px={2}>
       <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <Recorder/>
-            </Grid>
-            <Grid item xs={6}>
-              <Button color="primary" variant="contained" onClick={this.handleButtonClicked}>
-                  Take notes
-              </Button>
-            </Grid>
-          </Grid>
+        <Grid item xs={12} s={6} md={6}>
+          <Box>
+            <Recorder updateParent={this.update}/>
+            <TranscriptCard body={this.state.transcript}/>
+          </Box>
         </Grid>
-        <Grid item xs={6}>
-          <TranscriptCard body={this.state.transcript}/>
-        </Grid>
-        <Grid item xs={6}>
-         <NoteCard body={this.state.notes}/>
+        <Grid item xs={12} s={6} md={6}>
+          <Box>
+            <Button color="primary" variant="contained" onClick={this.takeNotes}>
+            Take notes
+            </Button>
+            <NoteCard body={this.state.notes}/>
+          </Box>
         </Grid>
       </Grid>
-      </Container>
       </Box>
     );
   }
