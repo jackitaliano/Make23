@@ -33,8 +33,8 @@ export default class NotePage extends Component {
     this.getNote();
   }
 
-  getNote(){
-    console.log("getting notes");
+  async getNote(){
+    console.log("Getting notes...");
     var csrftoken = getCookie('csrftoken')
     const requestOptions = {
       method: "GET",
@@ -44,7 +44,7 @@ export default class NotePage extends Component {
       }
     };
 
-    fetch('/api/note', requestOptions)
+    return fetch('/api/note', requestOptions)
     .then((response => response.json()))
     .then((data) => {
       this.setState({ 
@@ -54,8 +54,8 @@ export default class NotePage extends Component {
     });
   }
 
-  takeNotes(){
-    console.log("taking notes");
+  async takeNotes(){
+    console.log("Taking notes...");
     var csrftoken = getCookie('csrftoken')
     const requestOptions = {
       method: "POST",
@@ -70,17 +70,20 @@ export default class NotePage extends Component {
     };
 
     fetch('/api/take-notes', requestOptions)
-    .then((response => response.json()))
-    .then((data) => {
-      this.setState({ 
-        transcript: data.transcript,
-        notes: data.notes,
-      }); 
-  });
+      .then((response => response.json()))
+      .then((data) => {
+        this.setState({ 
+          transcript: data.transcript,
+          notes: data.notes,
+        })
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
   update() {
-    console.log("test update");
+
     this.getNote();
   }
 

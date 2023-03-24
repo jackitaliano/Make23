@@ -15,6 +15,7 @@ def generate_unique_code():
 class Note(models.Model):
     note_id = models.CharField(max_length=8, default=generate_unique_code, unique=True)
     transcript = models.TextField(default='')
+    note_buffer = models.TextField(default='')
     notes = models.TextField(default='')
     created_at = models.DateTimeField(auto_now_add=True)
     

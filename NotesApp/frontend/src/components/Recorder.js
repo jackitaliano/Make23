@@ -16,17 +16,8 @@ function getCookie(name) {
   return cookieValue;
 }
 
-  /*********************************
-  getUserMedia returns a Promise
-  resolve - returns a MediaStream Object
-  reject returns one of the following errors
-  AbortError - generic unknown cause
-  NotAllowedError (SecurityError) - user rejected permissions
-  NotFoundError - missing media track
-  NotReadableError - user permissions given but hardware/OS error
-  OverconstrainedError - constraint video settings preventing
-  TypeError - audio: false, video: false
-  *********************************/
+const recordingIntervalSec = 10;
+const recordingIntervalMS = recordingIntervalSec * 1000;
 
 
 export default class Recorder extends Component {
@@ -37,9 +28,10 @@ export default class Recorder extends Component {
       isActive: false,
     }
 
+    this.mediaStream = null;
     this.mediaRecorder = null;
+    this.intervalId = null;
     this.chunks = [];
-    this.audioSave = document.getElementById('audio2');
 
     this.constraintObj = {
       audio: {
@@ -50,51 +42,29 @@ export default class Recorder extends Component {
       video: false
     };
 
+    this.openMediaStream = this.openMediaStream.bind(this);
+    this.closeMediaStream = this.closeMediaStream.bind(this);
+    this.sendData = this.sendData.bind(this);
     this.openMediaRecorder = this.openMediaRecorder.bind(this);
+    this.recordVideoChunk = this.recordVideoChunk.bind(this);
     this.startMediaRecorder = this.startMediaRecorder.bind(this);
     this.stopMediaRecorder = this.stopMediaRecorder.bind(this);
-    this.sendData = this.sendData.bind(this);
+  }
+  
+  async openMediaStream() {
+    return navigator.mediaDevices.getUserMedia(this.constraintObj).then((mediaStreamObj) => {
+      this.mediaStream = mediaStreamObj;
+      return this.mediaStream;
+    })
   }
 
-  openMediaRecorder() {
-    return navigator.mediaDevices.getUserMedia(this.constraintObj)
-      .then((mediaStreamObj) => {
-        //add listeners for saving video/audio
-        this.chunks = [];
-
-        this.mediaRecorder = new MediaRecorder(mediaStreamObj);
-        
-        this.mediaRecorder.ondataavailable = (ev) => {
-          this.chunks.push(ev.data);
-        }
-        this.mediaRecorder.onstop = (ev) =>{
-          var blob = new Blob(this.chunks, {
-            type: "audio/wav"
-          });
-          this.sendData(blob);
-
-          this.chunks = [];
-          let audioUrl = window.URL.createObjectURL(blob);
-          if (this.audioSave) {
-            this.audioSave.src = audioUrl;
-          } else {
-            this.audioSave = document.getElementById('audio2');
-            this.audioSave.src = audioUrl;
-          }
-          mediaStreamObj.getTracks().forEach(function(track) {
-              if (track.readyState == 'live') {
-                  track.stop();
-              }
-          });
-          this.mediaRecorder = null;
-        }
-        
-        return Promise.resolve();
-      })
-      .catch(function(err) { 
-        console.log(err);
-        return Promise.reject(err);
-      });
+  closeMediaStream() {
+    this.mediaStream.getTracks().forEach(function(track) {
+      if (track.readyState == 'live') {
+          track.stop();
+      }
+    });
+    this.mediaRecorder = null;
   }
 
   sendData(blob) {
@@ -102,6 +72,7 @@ export default class Recorder extends Component {
 
     let formData = new FormData();
     formData.append('audio_file', blob, 'audio.webm');
+    console.log("Transcripting audio...");
     
     fetch('/api/audio', {
       method: 'POST',
@@ -112,6 +83,7 @@ export default class Recorder extends Component {
     })
     .then((response => response.json()))
     .then((data) => {
+      console.log("Updating note page...")
       this.props.updateParent()
     })
     .catch(error => {
@@ -119,36 +91,42 @@ export default class Recorder extends Component {
     });
   }
 
-  startMediaRecorder() {
-    if (this.state.isActive === true)
-      return;
-
-    
-    this.setState({
-      isActive: true,
-    })
-    if (this.mediaRecorder === null) {
-      this.openMediaRecorder()
-        .then(() =>{
-          this.mediaRecorder.start();    
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    } else {
-      this.mediaRecorder.start();
-    }
+  openMediaRecorder() {
+    this.mediaRecorder = new MediaRecorder(this.mediaStream);
+    const chunks = [];
+    this.mediaRecorder.ondataavailable = e => chunks.push(e.data);
+    this.mediaRecorder.onstop = e => this.sendData(new Blob(chunks, {type: "audio/webm"}));
   }
 
+  recordVideoChunk() {
+    this.openMediaRecorder();
+    this.mediaRecorder.start();
+    setTimeout(() => {
+      if(this.state.isActive) {
+        this.mediaRecorder.stop();
+        this.recordVideoChunk(this.mediaStream);
+      }
+    }, recordingIntervalMS);
+  }
+
+  startMediaRecorder() {
+    this.openMediaStream().then(() => {
+      this.setState({
+        isActive: true
+      })
+      this.recordVideoChunk();
+    });
+  }
 
   stopMediaRecorder() {
-    if (this.mediaRecorder === null || this.state.isActive === false)
-      return;
+    console.log("Stopping media recorder...");    
 
     this.setState({
-      isActive: false,
+      isActive: false
     })
+    
     this.mediaRecorder.stop();
+    this.closeMediaStream();
   }
 
   render() {
@@ -161,7 +139,6 @@ export default class Recorder extends Component {
           >
           {this.state.isActive ? "Stop" : "Start"}
           </Button>
-          <audio id="audio2" controls></audio>
       </div>
     );
   }
