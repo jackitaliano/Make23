@@ -17,7 +17,7 @@ export default class HomePage extends Component {
     return (
     <Router>
       <Routes>
-        <Route path='/' element={<NotePage/>}/>
+        <Route path='/' element={<NotePage noteId="OEBAJWTU"/>}/>
       </Routes>
     </Router>
     );

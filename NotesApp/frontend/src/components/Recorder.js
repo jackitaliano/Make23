@@ -69,12 +69,14 @@ export default class Recorder extends Component {
 
   sendData(blob) {
     let csrftoken = getCookie('csrftoken');
+    var url = '/api/audio'
 
     let formData = new FormData();
     formData.append('audio_file', blob, 'audio.webm');
+    formData.append('note_id', this.props.noteId)
     console.log("Transcripting audio...");
     
-    fetch('/api/audio', {
+    fetch(url, {
       method: 'POST',
       headers: { 
         'X-CSRFToken': csrftoken,

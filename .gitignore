@@ -2,6 +2,7 @@
 # python
 api_keys.json
 *.wav
+*.webm
 .venv/*
 __pycache__
 

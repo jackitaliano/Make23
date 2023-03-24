@@ -10,3 +10,8 @@ class TakeNotesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Note
         fields = ('transcript', 'notes')
+        
+class NoteIdSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Note
+        fields = ('note_id')

@@ -23,12 +23,14 @@ export default class NotePage extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      noteId: this.props.noteId,
       transcript: "",
       notes: "",
     }
     this.getNote = this.getNote.bind(this);
     this.takeNotes= this.takeNotes.bind(this);
     this.update = this.update.bind(this);
+    this.newNote = this.newNote.bind(this);
 
     this.getNote();
   }
@@ -36,15 +38,18 @@ export default class NotePage extends Component {
   async getNote(){
     console.log("Getting notes...");
     var csrftoken = getCookie('csrftoken')
+    var params = new URLSearchParams({"note_id": this.state.noteId})
+    var url = '/api/note?' + params
+
     const requestOptions = {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
         'X-CSRFToken': csrftoken
-      }
+      },
     };
 
-    return fetch('/api/note', requestOptions)
+    return fetch(url, requestOptions)
     .then((response => response.json()))
     .then((data) => {
       this.setState({ 
@@ -57,19 +62,19 @@ export default class NotePage extends Component {
   async takeNotes(){
     console.log("Taking notes...");
     var csrftoken = getCookie('csrftoken')
+    var url = '/api/take-notes';
+    var formData = new FormData();
+    formData.append("note_id", this.state.noteId)
+
     const requestOptions = {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         'X-CSRFToken': csrftoken
       },
-      body: JSON.stringify({
-        transcript: this.state.transcript,
-        notes: this.state.notes
-      }),
+      body: formData
     };
 
-    fetch('/api/take-notes', requestOptions)
+    fetch(url, requestOptions)
       .then((response => response.json()))
       .then((data) => {
         this.setState({ 
@@ -82,8 +87,32 @@ export default class NotePage extends Component {
       });
   }
 
-  update() {
+  async newNote() {
+    console.log("Getting notes...");
+    var csrftoken = getCookie('csrftoken')
+    var params = new URLSearchParams({"note_id": "NEW"})
+    var url = '/api/note?' + params
 
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        'X-CSRFToken': csrftoken
+      },
+    };
+
+    return fetch(url, requestOptions)
+    .then((response => response.json()))
+    .then((data) => {
+      this.setState({ 
+        noteId: data.note_id,
+        transcript: data.transcript,
+        notes: data.notes,
+      }); 
+    });
+  }
+
+  update() {
     this.getNote();
   }
 
@@ -93,11 +122,21 @@ export default class NotePage extends Component {
       <Grid container spacing={2}>
         <Grid item xs={12} s={6} md={6}>
           <Box>
-            <Recorder updateParent={this.update}/>
+            <Recorder noteId={this.state.noteId} updateParent={this.update}/>
             <TranscriptCard body={this.state.transcript}/>
           </Box>
         </Grid>
         <Grid item xs={12} s={6} md={6}>
+          <Grid container spacing={2}>
+            <Grid item xs={11}>
+
+            </Grid>
+            <Grid item xs={1}>
+              <Button color="secondary" variant="outlined" onClick={this.newNote}>
+                New Note
+              </Button>
+            </Grid>
+          </Grid>
           <Box>
             <Button color="primary" variant="contained" onClick={this.takeNotes}>
             Take notes
